@@ -12,15 +12,17 @@
  *
  */
 metadata {
-	definition (name: "Fortrezz Water Valve", namespace: "smartthings", author: "SmartThings", ocfDeviceType: "oic.d.watervalve") {
+	definition (name: "Fortrezz Water Valve", namespace: "smartthings", author: "SmartThings", ocfDeviceType: "oic.d.watervalve", runLocally: true, minHubCoreVersion: '000.017.0012', executeCommandsLocally: false) {
 		capability "Actuator"
 		capability "Health Check"
 		capability "Valve"
 		capability "Refresh"
 		capability "Sensor"
 
-		fingerprint deviceId: "0x1000", inClusters: "0x25,0x72,0x86,0x71,0x22,0x70"
-		fingerprint mfr:"0084", prod:"0213", model:"0215", deviceJoinName: "FortrezZ Water Valve"
+		fingerprint deviceId: "0x1000", inClusters: "0x25,0x72,0x86,0x71,0x22,0x70", deviceJoinName: "FortrezZ Valve"
+		fingerprint mfr:"0084", prod:"0213", model:"0215", deviceJoinName: "FortrezZ Valve" //FortrezZ Water Valve
+		//zw:Ls2a type:1000 mfr:027A prod:0101 model:0036 ver:1.07 zwv:7.13 lib:03 cc:5E,55,98,9F,6C,22 sec:25,85,8E,59,71,86,72,5A,87,73,7A,31,70,80
+		fingerprint mfr:"027A", prod:"0101", model:"0036", deviceJoinName: "Zooz Valve" //Zooz ZAC36 Titan Valve Actuator
 	}
 
 	// simulator metadata
@@ -35,8 +37,8 @@ metadata {
 
 	// tile definitions
 	tiles(scale: 2) {
-		multiAttributeTile(name:"contact", type: "generic", width: 6, height: 4, canChangeIcon: true){
-			tileAttribute ("device.contact", key: "PRIMARY_CONTROL") {
+		multiAttributeTile(name:"valve", type: "generic", width: 6, height: 4, canChangeIcon: true){
+			tileAttribute ("device.valve", key: "PRIMARY_CONTROL") {
 				attributeState "open", label: '${name}', action: "valve.close", icon: "st.valves.water.open", backgroundColor: "#00A0DC", nextState:"closing"
 				attributeState "closed", label: '${name}', action: "valve.open", icon: "st.valves.water.closed", backgroundColor: "#ffffff", nextState:"opening"
 				attributeState "opening", label: '${name}', action: "valve.close", icon: "st.valves.water.open", backgroundColor: "#00A0DC"
@@ -48,8 +50,8 @@ metadata {
 			state "default", label:'', action:"refresh.refresh", icon:"st.secondary.refresh"
 		}
 
-		main "contact"
-		details(["contact","refresh"])
+		main "valve"
+		details(["valve","refresh"])
 	}
 }
 
@@ -78,8 +80,7 @@ def parse(String description) {
 def zwaveEvent(physicalgraph.zwave.commands.switchbinaryv1.SwitchBinaryReport cmd) {
 	def value = cmd.value ? "closed" : "open"
 
-	return [createEventWithDebug([name: "contact", value: value, descriptionText: "$device.displayName valve is $value"]),
-			createEventWithDebug([name: "valve", value: value, descriptionText: "$device.displayName valve is $value"])]
+	return createEventWithDebug([name: "valve", value: value, descriptionText: "$device.displayName valve is $value"])
 }
 
 def zwaveEvent(physicalgraph.zwave.Command cmd) {
